@@ -1,13 +1,15 @@
 {
   "name": "browser-native-vision-assistant-for-low-vision-accessibility",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "VisionBridge AI — Browser-Native Vision Assistant",
+  "main": "server/dist/index.js",
   "scripts": {
     "dev": "concurrently -n server,client \"npm --prefix server run dev\" \"npm --prefix client run dev\"",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "npm --prefix server run build && npm --prefix client run build",
+    "start": "npm --prefix server run start",
+    "lint": "npm --prefix client run lint"
   },
-  "keywords": [],
+  "keywords": ["accessibility", "ai", "vision", "react", "node"],
   "author": "",
   "license": "ISC",
   "type": "commonjs",

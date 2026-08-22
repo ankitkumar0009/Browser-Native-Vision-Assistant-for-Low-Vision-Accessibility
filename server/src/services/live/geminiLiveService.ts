@@ -1,32 +1,27 @@
 import WebSocket from 'ws';
-import { getMockImageDescription } from './mockVisionService';
+import { env } from '../../config/env';
 
 const GEMINI_HOST = 'generativelanguage.googleapis.com';
 
 export class GeminiLiveService {
   private geminiWs: WebSocket | null = null;
   private clientWs: WebSocket;
-  private mockInterval: NodeJS.Timeout | null = null;
 
   constructor(clientWs: WebSocket) {
     this.clientWs = clientWs;
   }
 
   public start() {
-    const apiKey = process.env.AI_API_KEY;
-
-    if (!apiKey) {
-      console.log('No AI_API_KEY found, using mock live vision service.');
-      this.startMock();
+    if (!env.geminiApiKey) {
+      this.clientWs.send(JSON.stringify({ type: 'error', text: 'GEMINI_API_KEY is not configured on the server.' }));
       return;
     }
 
-    const url = `wss://${GEMINI_HOST}/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent?key=${apiKey}`;
+    const url = `wss://${GEMINI_HOST}/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent?key=${env.geminiApiKey}`;
     this.geminiWs = new WebSocket(url);
 
     this.geminiWs.on('open', () => {
       console.log('Connected to Gemini Live API');
-      // Send setup message
       const setupMsg = {
         setup: {
           model: 'models/gemini-2.0-flash-exp',
@@ -45,7 +40,6 @@ export class GeminiLiveService {
           const parts = response.serverContent.modelTurn.parts;
           for (const part of parts) {
             if (part.text) {
-               // Send the text back to the client
                this.clientWs.send(JSON.stringify({ type: 'text', text: part.text }));
             }
           }
@@ -69,7 +63,6 @@ export class GeminiLiveService {
     try {
       const msg = JSON.parse(data);
       if (msg.type === 'image' && msg.data) {
-        // Send image frame to Gemini
         if (this.geminiWs && this.geminiWs.readyState === WebSocket.OPEN) {
           const clientContent = {
             realtimeInput: {
@@ -82,8 +75,6 @@ export class GeminiLiveService {
             }
           };
           this.geminiWs.send(JSON.stringify(clientContent));
-        } else if (!process.env.AI_API_KEY) {
-          // Mock mode: ignoring incoming frames as we just mock every 10s
         }
       }
     } catch (err) {
@@ -96,19 +87,5 @@ export class GeminiLiveService {
       this.geminiWs.close();
       this.geminiWs = null;
     }
-    if (this.mockInterval) {
-      clearInterval(this.mockInterval);
-      this.mockInterval = null;
-    }
-  }
-
-  private startMock() {
-    // Send a mock description every 10 seconds
-    this.mockInterval = setInterval(() => {
-      if (this.clientWs.readyState === WebSocket.OPEN) {
-        const desc = getMockImageDescription();
-        this.clientWs.send(JSON.stringify({ type: 'text', text: `(Mock) ${desc}` }));
-      }
-    }, 10000);
   }
 }

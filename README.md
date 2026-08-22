@@ -1,23 +1,10 @@
-# Browser-Native Vision Assistant for Low-Vision Accessibility
+# VisionBridge AI — Browser-Native Vision Assistant
 
-**“See More. Understand More. Navigate the Digital World with Confidence.”**
+**See More. Understand More. Navigate with Confidence.**
 
-Browser-Native Vision Assistant is an AI-powered accessibility platform designed to assist people with low vision by converting visual information into meaningful spoken and textual descriptions directly inside the browser.
-
-## Problem Statement
-People with low vision or visual impairments often face challenges interpreting visual content online or in their physical surroundings. Existing tools are sometimes expensive, require specialized hardware, or lack modern AI capabilities. This project bridges that gap by providing a fully browser-native, accessible, and AI-powered solution.
+An AI-powered visual assistance web application designed to help people with low vision understand images, text, and their surroundings. It provides real image understanding, OCR, live camera assistance, voice interaction, and accessibility controls—all accessible via the browser.
 
 ## Features
-- **AI Image Understanding:** Upload images to get detailed descriptions, object detection, and scene understanding.
-- **Live Vision Mode:** Use your device's camera for real-time analysis of your surroundings.
-- **OCR Text Recognition:** Extract text from images and have it read aloud.
-- **Text-to-Speech (TTS):** Integrated Web Speech API for reading results aloud with adjustable speed.
-- **Voice Commands:** Control the app hands-free using speech recognition.
-- **Accessibility First UI:** High contrast modes, adjustable font sizes, reduced animations, and full keyboard navigation.
-
-## Technology Stack
-- **Frontend:** React.js, TypeScript, Vite, Tailwind CSS v4, Lucide React
-- **Backend:** Node.js, Express.js, Multer
 - **Browser APIs:** MediaDevices API, Web Speech API
 - **AI/OCR:** Configurable to use OpenAI Vision / Tesseract (currently using mock services for immediate demo capability)
 

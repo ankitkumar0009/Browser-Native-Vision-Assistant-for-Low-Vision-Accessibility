@@ -1,14 +1,17 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+﻿import { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 
 type Theme = 'light' | 'dark' | 'high-contrast';
 type FontSize = 'normal' | 'large' | 'x-large';
+type LineSpacing = 'normal' | 'loose';
 
 interface AccessibilityContextProps {
   theme: Theme;
   setTheme: (theme: Theme) => void;
   fontSize: FontSize;
   setFontSize: (size: FontSize) => void;
+  lineSpacing: LineSpacing;
+  setLineSpacing: (spacing: LineSpacing) => void;
   reducedMotion: boolean;
   setReducedMotion: (reduced: boolean) => void;
   voiceFeedback: boolean;
@@ -20,6 +23,7 @@ const AccessibilityContext = createContext<AccessibilityContextProps | undefined
 export const AccessibilityProvider = ({ children }: { children: ReactNode }) => {
   const [theme, setTheme] = useState<Theme>(() => (localStorage.getItem('a11y-theme') as Theme) || 'light');
   const [fontSize, setFontSize] = useState<FontSize>(() => (localStorage.getItem('a11y-fontsize') as FontSize) || 'normal');
+  const [lineSpacing, setLineSpacing] = useState<LineSpacing>(() => (localStorage.getItem('a11y-linespacing') as LineSpacing) || 'normal');
   const [reducedMotion, setReducedMotion] = useState<boolean>(() => localStorage.getItem('a11y-reducedmotion') === 'true');
   const [voiceFeedback, setVoiceFeedback] = useState<boolean>(() => localStorage.getItem('a11y-voicefeedback') !== 'false');
 
@@ -40,6 +44,15 @@ export const AccessibilityProvider = ({ children }: { children: ReactNode }) => 
   }, [fontSize]);
 
   useEffect(() => {
+    localStorage.setItem('a11y-linespacing', lineSpacing);
+    if (lineSpacing === 'loose') {
+      document.documentElement.style.lineHeight = '2';
+    } else {
+      document.documentElement.style.lineHeight = '1.5';
+    }
+  }, [lineSpacing]);
+
+  useEffect(() => {
     localStorage.setItem('a11y-reducedmotion', reducedMotion.toString());
     if (reducedMotion) {
       document.documentElement.classList.add('reduced-motion');
@@ -53,7 +66,7 @@ export const AccessibilityProvider = ({ children }: { children: ReactNode }) => 
   }, [voiceFeedback]);
 
   return (
-    <AccessibilityContext.Provider value={{ theme, setTheme, fontSize, setFontSize, reducedMotion, setReducedMotion, voiceFeedback, setVoiceFeedback }}>
+    <AccessibilityContext.Provider value={{ theme, setTheme, fontSize, setFontSize, lineSpacing, setLineSpacing, reducedMotion, setReducedMotion, voiceFeedback, setVoiceFeedback }}>
       {children}
     </AccessibilityContext.Provider>
   );

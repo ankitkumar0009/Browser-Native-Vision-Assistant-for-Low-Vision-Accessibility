@@ -1,103 +1,149 @@
+﻿import React from 'react';
 import { useAccessibility } from '../contexts/AccessibilityContext';
 import { useSpeech } from '../contexts/SpeechContext';
-import { Button } from '../components/UI/Button';
+import { clearHistory } from '../services/storageService';
 
 export default function Settings() {
-  const { theme, setTheme, fontSize, setFontSize, reducedMotion, setReducedMotion } = useAccessibility();
-  const { rate, setRate } = useSpeech();
+  const { theme, setTheme, fontSize, setFontSize, lineSpacing, setLineSpacing, reducedMotion, setReducedMotion, voiceFeedback, setVoiceFeedback } = useAccessibility();
+  const { rate, setRate, pitch, setPitch, voiceURI, setVoiceURI, voices } = useSpeech();
 
   return (
-    <div className="max-w-3xl mx-auto space-y-12">
-      <h1 className="text-4xl font-bold border-b-4 border-[var(--primary)] pb-4">Accessibility Settings</h1>
+    <div className="max-w-4xl mx-auto space-y-12">
+      <h1 className="text-4xl font-bold border-b-4 border-[var(--accent)] pb-4">Settings</h1>
 
-      <section className="space-y-6 bg-[var(--secondary)] p-8 rounded-2xl">
-        <h2 className="text-3xl font-bold">Visual Appearance</h2>
+      <section className="space-y-8 bg-[var(--secondary)] p-8 rounded-2xl border-2 border-[var(--accent)]">
+        <h2 className="text-3xl font-bold flex items-center gap-3">Visual Accessibility</h2>
         
-        <div className="space-y-4">
-          <h3 className="text-xl font-semibold">Theme & Contrast</h3>
-          <div className="flex flex-wrap gap-4">
-            <Button 
-              variant={theme === 'light' ? 'primary' : 'outline'}
-              onClick={() => setTheme('light')}
+        <div className="grid md:grid-cols-2 gap-8">
+          <div className="space-y-4">
+            <label className="text-2xl font-bold block" htmlFor="theme-select">Theme / Contrast</label>
+            <select 
+              id="theme-select"
+              value={theme}
+              onChange={(e) => setTheme(e.target.value as any)}
+              className="w-full text-xl p-4 rounded-xl border-4 border-[var(--accent)] bg-[var(--background)] text-[var(--foreground)]"
             >
-              Light Mode
-            </Button>
-            <Button 
-              variant={theme === 'dark' ? 'primary' : 'outline'}
-              onClick={() => setTheme('dark')}
-            >
-              Dark Mode
-            </Button>
-            <Button 
-              variant={theme === 'high-contrast' ? 'primary' : 'outline'}
-              onClick={() => setTheme('high-contrast')}
-            >
-              High Contrast
-            </Button>
+              <option value="light">Light Mode</option>
+              <option value="dark">Dark Mode</option>
+              <option value="high-contrast">High Contrast</option>
+            </select>
           </div>
-        </div>
 
-        <div className="space-y-4 pt-4 border-t-2 border-[var(--accent)]">
-          <h3 className="text-xl font-semibold">Text Size</h3>
-          <div className="flex flex-wrap gap-4">
-            <Button 
-              variant={fontSize === 'normal' ? 'primary' : 'outline'}
-              onClick={() => setFontSize('normal')}
+          <div className="space-y-4">
+            <label className="text-2xl font-bold block" htmlFor="font-size">Font Size</label>
+            <select 
+              id="font-size"
+              value={fontSize}
+              onChange={(e) => setFontSize(e.target.value as any)}
+              className="w-full text-xl p-4 rounded-xl border-4 border-[var(--accent)] bg-[var(--background)] text-[var(--foreground)]"
             >
-              Normal
-            </Button>
-            <Button 
-              variant={fontSize === 'large' ? 'primary' : 'outline'}
-              onClick={() => setFontSize('large')}
-            >
-              Large
-            </Button>
-            <Button 
-              variant={fontSize === 'x-large' ? 'primary' : 'outline'}
-              onClick={() => setFontSize('x-large')}
-            >
-              Extra Large
-            </Button>
+              <option value="normal">Normal</option>
+              <option value="large">Large</option>
+              <option value="x-large">Extra Large</option>
+            </select>
           </div>
-        </div>
 
-        <div className="space-y-4 pt-4 border-t-2 border-[var(--accent)]">
-          <h3 className="text-xl font-semibold">Motion & Animations</h3>
-          <div className="flex items-center gap-4">
-            <label className="text-lg flex items-center gap-3 cursor-pointer">
-              <input 
-                type="checkbox" 
-                checked={reducedMotion} 
-                onChange={(e) => setReducedMotion(e.target.checked)}
-                className="w-6 h-6 rounded accent-[var(--primary)]"
-              />
-              Reduce Animations
-            </label>
+          <div className="space-y-4">
+            <label className="text-2xl font-bold block" htmlFor="line-spacing">Line Spacing</label>
+            <select 
+              id="line-spacing"
+              value={lineSpacing}
+              onChange={(e) => setLineSpacing(e.target.value as any)}
+              className="w-full text-xl p-4 rounded-xl border-4 border-[var(--accent)] bg-[var(--background)] text-[var(--foreground)]"
+            >
+              <option value="normal">Normal</option>
+              <option value="loose">Loose (More Space)</option>
+            </select>
+          </div>
+
+          <div className="flex items-center justify-between p-4 bg-[var(--background)] rounded-xl border-4 border-[var(--accent)] mt-8">
+            <span className="text-2xl font-bold">Reduce Motion</span>
+            <input 
+              type="checkbox" 
+              checked={reducedMotion}
+              onChange={(e) => setReducedMotion(e.target.checked)}
+              className="w-8 h-8 accent-[var(--primary)]"
+              aria-label="Reduce motion"
+            />
           </div>
         </div>
       </section>
 
-      <section className="space-y-6 bg-[var(--secondary)] p-8 rounded-2xl">
-        <h2 className="text-3xl font-bold">Voice & Speech</h2>
+      <section className="space-y-8 bg-[var(--secondary)] p-8 rounded-2xl border-2 border-[var(--accent)]">
+        <h2 className="text-3xl font-bold">Speech Preferences</h2>
         
-        <div className="space-y-4">
-          <h3 className="text-xl font-semibold">Reading Speed</h3>
-          <div className="flex items-center gap-4 max-w-md">
-            <span className="text-lg">Slower</span>
+        <div className="space-y-8">
+          <div className="space-y-4">
+            <label className="text-2xl font-bold block" htmlFor="voice-select">Voice</label>
+            <select 
+              id="voice-select"
+              value={voiceURI}
+              onChange={(e) => setVoiceURI(e.target.value)}
+              className="w-full text-xl p-4 rounded-xl border-4 border-[var(--accent)] bg-[var(--background)] text-[var(--foreground)]"
+            >
+              {voices.map(voice => (
+                <option key={voice.voiceURI} value={voice.voiceURI}>
+                  {voice.name} ({voice.lang})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="space-y-4">
+            <div className="flex justify-between">
+              <label className="text-2xl font-bold" htmlFor="speech-rate">Speed ({rate}x)</label>
+            </div>
             <input 
+              id="speech-rate"
               type="range" 
-              min="0.5" 
-              max="2" 
-              step="0.1" 
+              min="0.5" max="2" step="0.1" 
               value={rate}
               onChange={(e) => setRate(parseFloat(e.target.value))}
-              className="flex-1 h-4 bg-[var(--accent)] rounded-lg appearance-none cursor-pointer accent-[var(--primary)]"
-              aria-label="Adjust reading speed"
+              className="w-full h-4 bg-gray-300 rounded-lg appearance-none cursor-pointer accent-[var(--primary)]"
             />
-            <span className="text-lg">Faster</span>
           </div>
-          <p className="text-lg mt-2">Current Speed: {rate}x</p>
+
+          <div className="flex items-center justify-between p-4 bg-[var(--background)] rounded-xl border-4 border-[var(--accent)]">
+            <span className="text-2xl font-bold">Voice Feedback for UI</span>
+            <input 
+              type="checkbox" 
+              checked={voiceFeedback}
+              onChange={(e) => setVoiceFeedback(e.target.checked)}
+              className="w-8 h-8 accent-[var(--primary)]"
+              aria-label="Enable voice feedback for UI interactions"
+            />
+          </div>
         </div>
+      </section>
+
+      <section className="space-y-8 bg-[var(--secondary)] p-8 rounded-2xl border-2 border-[var(--accent)]">
+        <h2 className="text-3xl font-bold">Privacy & Data</h2>
+        
+        <div className="flex items-center justify-between p-4 bg-[var(--background)] rounded-xl border-4 border-[var(--accent)]">
+          <span className="text-2xl font-bold">Store History Locally</span>
+          <input 
+            type="checkbox" 
+            defaultChecked={localStorage.getItem('privacy_storeHistory') === 'true'}
+            onChange={(e) => {
+              localStorage.setItem('privacy_storeHistory', e.target.checked ? 'true' : 'false');
+              if (!e.target.checked) clearHistory();
+            }}
+            className="w-8 h-8 accent-[var(--primary)]"
+            aria-label="Store analysis history locally in browser"
+          />
+        </div>
+
+        <button 
+          onClick={() => {
+            if(window.confirm('Are you sure you want to clear all history?')) {
+              clearHistory();
+              alert('History cleared.');
+            }
+          }}
+          className="w-full text-left p-4 bg-red-100 text-red-900 dark:bg-red-900/30 dark:text-red-300 rounded-xl border-4 border-red-500 font-bold text-xl hover:bg-red-200"
+        >
+          Clear Local History
+        </button>
       </section>
     </div>
   );

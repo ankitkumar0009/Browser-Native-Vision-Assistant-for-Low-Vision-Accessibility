@@ -1,73 +1,70 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-
-declare global {
-  interface Window {
-    SpeechRecognition: any;
-    webkitSpeechRecognition: any;
-  }
-}
+﻿import { useState, useEffect, useCallback, useRef } from 'react';
 
 export function useSpeechRecognition(onCommand?: (command: string) => void) {
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState('');
-  const [recognition, setRecognition] = useState<any>(null);
-  const onCommandRef = useRef(onCommand);
-
-  // Keep ref up to date
-  useEffect(() => {
-    onCommandRef.current = onCommand;
-  }, [onCommand]);
+  const [commandHistory, setCommandHistory] = useState<string[]>([]);
+  const [supported, setSupported] = useState(false);
+  const recognitionRef = useRef<any>(null);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
       if (SpeechRecognition) {
-        const recog = new SpeechRecognition();
-        recog.continuous = false;
-        recog.interimResults = false;
-        recog.lang = 'en-US';
+        setSupported(true);
+        recognitionRef.current = new SpeechRecognition();
+        recognitionRef.current.continuous = true;
+        recognitionRef.current.interimResults = false;
 
-        recog.onresult = (event: any) => {
-          const text = event.results[0][0].transcript;
-          setTranscript(text);
-          if (onCommandRef.current) {
-            onCommandRef.current(text.toLowerCase());
+        recognitionRef.current.onresult = (event: any) => {
+          const current = event.resultIndex;
+          const transcriptResult = event.results[current][0].transcript.trim();
+          setTranscript(transcriptResult);
+          setCommandHistory(prev => [transcriptResult, ...prev].slice(0, 5));
+          if (onCommand) {
+            onCommand(transcriptResult);
           }
         };
 
-        recog.onend = () => {
-          setIsListening(false);
-        };
-
-        recog.onerror = (event: any) => {
+        recognitionRef.current.onerror = (event: any) => {
           console.error('Speech recognition error', event.error);
-          setIsListening(false);
+          if (event.error === 'not-allowed') {
+            setIsListening(false);
+          }
         };
 
-        setRecognition(recog);
+        recognitionRef.current.onend = () => {
+          // Auto restart if it was supposed to be listening
+          // but let's just stop for now to avoid infinite loops on error
+          setIsListening(false);
+        };
       }
     }
-  }, []);
+    
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+    };
+  }, [onCommand]);
 
   const startListening = useCallback(() => {
-    if (recognition) {
+    if (recognitionRef.current) {
       try {
-        recognition.start();
+        recognitionRef.current.start();
         setIsListening(true);
       } catch (e) {
         console.error(e);
       }
-    } else {
-      alert("Speech Recognition API is not supported in this browser.");
     }
-  }, [recognition]);
+  }, []);
 
   const stopListening = useCallback(() => {
-    if (recognition) {
-      recognition.stop();
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
       setIsListening(false);
     }
-  }, [recognition]);
+  }, []);
 
-  return { isListening, transcript, startListening, stopListening, supported: !!recognition };
+  return { isListening, transcript, startListening, stopListening, supported, commandHistory };
 }

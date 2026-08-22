@@ -14,11 +14,6 @@ export default defineConfig({
         target: 'http://localhost:5000',
         changeOrigin: true,
       },
-      '/live-vision': {
-        target: 'ws://localhost:5000',
-        ws: true,
-        changeOrigin: true,
-      },
     },
   },
 })

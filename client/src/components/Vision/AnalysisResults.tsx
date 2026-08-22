@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { Volume2, Square, Copy, Type } from 'lucide-react';
+﻿import React, { useEffect } from 'react';
+import { Volume2, Square, Copy, Type, AlertTriangle } from 'lucide-react';
 import { Button } from '../UI/Button';
 import { useSpeech } from '../../contexts/SpeechContext';
 
@@ -7,17 +7,12 @@ interface AnalysisResultsProps {
   description?: string;
   objects?: string[];
   ocrText?: string;
+  safetyAlerts?: string[];
   isLoading: boolean;
 }
 
-export function AnalysisResults({ description, objects, ocrText, isLoading }: AnalysisResultsProps) {
+export function AnalysisResults({ description, objects, ocrText, safetyAlerts, isLoading }: AnalysisResultsProps) {
   const { speak, stopSpeaking, isSpeaking } = useSpeech();
-
-  useEffect(() => {
-    if (description) {
-      speak(description);
-    }
-  }, [description]);
 
   if (isLoading) {
     return (
@@ -29,10 +24,25 @@ export function AnalysisResults({ description, objects, ocrText, isLoading }: An
     );
   }
 
-  if (!description && !ocrText) return null;
+  if (!description && !ocrText && (!safetyAlerts || safetyAlerts.length === 0)) return null;
 
   return (
     <div className="w-full max-w-3xl mx-auto mt-8 space-y-8" role="region" aria-live="polite">
+      
+      {safetyAlerts && safetyAlerts.length > 0 && (
+        <div className="p-8 border-4 border-red-500 rounded-2xl bg-red-100 dark:bg-red-900/30">
+          <h2 className="text-3xl font-bold flex items-center gap-3 text-red-700 dark:text-red-400 mb-4">
+            <AlertTriangle size={32} />
+            Safety Alerts
+          </h2>
+          <ul className="list-disc pl-6 space-y-2">
+            {safetyAlerts.map((alert, i) => (
+              <li key={i} className="text-xl font-bold text-red-900 dark:text-red-200">{alert}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       {description && (
         <div className="p-8 border-4 border-[var(--accent)] rounded-2xl bg-[var(--secondary)]">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
