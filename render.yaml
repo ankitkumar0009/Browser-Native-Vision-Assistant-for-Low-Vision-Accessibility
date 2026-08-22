@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: visionbridge-backend
+    runtime: node
+    rootDir: server
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: CLIENT_URL
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: MAX_IMAGE_SIZE_MB
+        value: "10"
